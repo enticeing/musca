@@ -1,0 +1,746 @@
+.TH musca 1 "April 10, 2009" Musca "Users Manual"
+.SH NAME
+musca \- A simple dynamic window manager
+.SH SYNOPSIS
+.TP
+musca [OPTIONS]
+.SH DESCRIPTION
+Musca is a simple dynamic window manager for X, with features nicked from
+ratpoison and dwm.
+.PP
+Musca operates as a tiling window manager by default. It uses "manual
+tiling", which means the user determines how the screen is divided into
+non-overlapping frames, with no restrictions on layout.
+.PP
+Application windows always fill their assigned frame, with the exception of
+transient windows and popup dialog boxes which float above their parent
+application at the appropriate size. Once visible, applications do not
+change frames unless so instructed.
+.PP
+Since not all applications suit tiling, a more traditional stacking window
+manager mode is also available, allowing windows to float at any screen
+location and overlap.
+.PP
+There are no built in status bars, panels, tabs or window decorations to
+take up screen real estate. If the user wants any of these things, there
+are plenty of external applications available to do the job. Window
+decoration is limited to a slender border, which is coloured to indicate
+keyboard focus.
+.PP
+Windows are placed in named "groups" which can be used in a similar fashion
+to virtual desktops. Groups can be added and removed on the fly, and each
+group has its own frame layout.
+.PP
+The excellent "dmenu" utility is being used to execute commands and launch
+applications, and it can also act as a window and group switcher.
+Basic EWMH support allows use of common panels, pagers and the wmctrl
+utility.
+.PP
+Windows and frames are navigated and focused on any mouse button click,
+including rolling the wheel, or alternatively driven entirely by the
+keyboard. Simple key combinations exist for window switching, group switching,
+frame control and screen switching.
+.PP
+For more information about Musca visit http://aerosuidae.net/musca.html
+.SH OPTIONS
+These command line options are recognized by Musca:
+.TP
+\-c [command]
+.nf
+Connect to a running instance of Musca and execute a single Musca command
+supplied on the command line.
+.fi
+.TP
+\-i
+.nf
+Connect to a running instance of Musca and execute one or more EOL delimited
+Musca commands supplied on stdin.
+.fi
+.TP
+\-s [path]
+.nf
+Override the "startup" setting by specifying a custom path to a configuration
+file holding Musca commands to execute at startup.
+.fi
+.TP
+\-v
+.nf
+Report version number.
+.fi
+.SH INITIALIZATION
+During initialization, Musca will read the ~/.musca_start configuration file
+or any other text file which was specified by the 'startup' setting in config.h
+during compilation.
+.PP
+The startup file should contain Musca commands one per line. Any comments must
+be on separate lines starting with hash (#). Blank lines are acceptable.
+.PP
+ For example:
+
+ manage off trayer
+ manage off Conky
+
+ screen 1
+ name bling
+ pad 0 0 0 32
+ exec trayer
+ exec conky
+
+ screen 0
+ add mail
+ add net
+ add work
+ use mail
+ exec firefox gmail.com
+ exec evolution
+ hsplit 1/2
+
+ set notify notify-send -t 3000 Musca "$(cat)"
+.PP
+.BR
+Note that launching applications from the startup file is acceptable,
+but can be of limited use if they have to start in more than one
+group. The 'exec' command runs asynchronously, and if applications are
+slow to create their windows, they may not necessarily appear in the
+expected group. In this case, a better option is launching applications
+from ~/.xinitrc.
+
+.SH MUSCA COMMANDS
+.TP
+add <name>
+.nf
+create a new group called `name`, and switch to it.
+.fi
+.TP
+alias <name> <command>
+.nf
+create a new Musca command.
+.fi
+.TP
+bind <on|off> <Modifier>+<Key> <command>
+.nf
+bind a Musca command to a key combination with `on`, and remove it
+again with `off`. If the argument to `off` is `all`, it clears the
+bound key list. The `command` argument is only need for `on`.
+.fi
+.TP
+border <on|off|flip>
+.nf
+(toggle) turn the current frame border on and off.
+.fi
+.TP
+catchall <on|off|flip>
+.nf
+(toggle) set the current frame as a `catch-all`, where all new windows
+will open.
+.fi
+.TP
+client hints <on|off>
+.nf
+(toggle) whether to respect X size hints for the current application window,
+such as PMinSize, PMaxSize, PResizeInc, PBaseSize, PAspect.
+.fi
+.TP
+command
+.nf
+launch the dmenu Musca command input.
+.fi
+.TP
+cycle <local> <next|prev>
+.nf
+cycle a hidden window into the current frame. `local` means
+cycle over windows previously displayed in the current frame.
+`next` or `prev` specify the direction, defaulting to next.
+Both arguments are optional.
+.fi
+.TP
+dedicate <on|off|flip>
+.nf
+(toggle) dedicate the current frame to the current application.
+.fi
+.TP
+drop <name|nr>
+.nf
+delete a group by `name` or by `nr`.
+.fi
+.TP
+dump <file>
+.nf
+export a description (group name and frame layout) of the current group to `file`.
+.fi
+.TP
+exec <command>
+.nf
+execute as shell command.
+.fi
+.TP
+focus <left|right|up|down> or <lfocus|rfocus|ufocus|dfocus>
+.nf
+change focus to a frame in the specified direction.
+.fi
+.TP
+height <relative|pixel>
+.nf
+resize frame vertically.
+.fi
+.TP
+hook <on|off> <name> <command>
+.nf
+bind a Musca command to a named hook.
+.fi
+.TP
+hsplit <relative|pixel>
+.nf
+split frame horizontally.
+.fi
+.TP
+kill <number|name>
+.nf
+politely close the client window via a close event. When the optional
+argument `number` or `name` is given, kill the associated window,
+otherwise kill the current frame. Press again to forcibly kill it.
+.fi
+.TP
+load <file>
+.nf
+import a description from `file` into the current group.
+.fi
+.TP
+manage <on|off> <name>
+.nf
+(toggle) set whether the window class called `name` is managed or ignored.
+.fi
+.TP
+move <name|nr>
+.nf
+move the current window to the group called `name` or to the group `nr`.
+If it's an unknown group, automatically creates the group `name` and then
+moves the current window to that group.
+.fi
+.TP
+name <name>
+.nf
+rename the current group.
+.fi
+.TP
+only
+.nf
+remove all other frames except the current one, resizing it to full screen.
+.fi
+.TP
+pad <left> <right> <top> <bottom>
+.nf
+set the current group screen padding in pixels.
+.fi
+.TP
+quit
+.nf
+exit Musca.
+.fi
+.TP
+raise <number|title>
+.nf
+raise and focus a window in the current group by number (order opened) or
+title.
+.fi
+.TP
+remove
+.nf
+remove the current frame and resize others to fill the gap.
+.fi
+.TP
+resize <left|right|up|down>
+.nf
+resize the current frame in the specified direction.
+.fi
+.TP
+run <file>
+.nf
+execute a file consisting of Musca commands. The file must contain
+one command per line. Lines starting with hash *#* are comments and
+blank lines are acceptable.
+.fi
+.TP
+say <text>
+.nf
+display text via the method in the 'notify' setting.
+.fi
+.TP
+screen <number>
+.nf
+switch to screen `number`. This is zero based, and should match the order
+in which screens are defined in "xorg.conf".
+.fi
+.TP
+set <setting> <value>
+.nf
+set a Musca variable. See SETTINGS for a list of variable names.
+.fi
+.TP
+shell
+.nf
+launch the dmenu shell command input.
+.fi
+.TP
+show <settings|bindings|unmanaged|hooks|groups|frames|windows|aliases>
+.nf
+output a system table for diagnostic purposes.
+.fi
+.TP
+shrink <number|title>
+.nf
+Minimize/Iconify (same thing in Musca) a window.
+.fi
+.TP
+slide <left|right|up|down> or <lslide|rslide|uslide|dslide>
+.nf
+move current window into the frame to the left, right, up and down respectively.
+.fi
+.TP
+stack <on|off|flip>
+.nf
+(toggle) switch the current group between `tiling` and `stacking` window modes.
+.fi
+.TP
+swap <left|right|up|down> or <lswap|rswap|uswap|dswap>
+.nf
+swap current window with the contents of the frame to the left, right, up
+and down respectively.
+.fi
+.TP
+switch <window|group>
+.nf
+launch the dmenu window or group switcher.
+.fi
+.TP
+undo
+.nf
+revert the last frame layout change.
+.fi
+.TP
+use <name|number|(other)|(prev)|(next)>
+.nf
+switch to a group called by its `name` or to a group by its `number`.
+`name` has precedence over `number`. If it's an unknown group, automatically
+creates the group `name` and then switch to that group.
+When `(other)`, `(prev)` or `(next)`, switch to the previously focused, previous
+or next group respectively.
+.fi
+.TP
+vsplit <relative|pixel>
+.nf
+split frame vertically.
+.fi
+.TP
+width <relative|pixel>
+.nf
+resize frame horizontally.
+.fi
+.PP
+Notes:
+.PP
+Any Musca command may be prefixed with "silent" to prevent any messages
+being sent to the notify setting. This is useful for scripting, to
+prevent popup window noise.
+.PP
+Example:
+.nf
+musca -c "silent show groups"
+.fi
+.PP
+Relative values can be specified as a percentage or a fraction:
+.PP
+Examples:
+.nf
+hsplit 2/3
+hsplit 33%
+.fi
+
+.SH SETTINGS
+.TP
+.B border_catchall_focus
+.nf
+Type: string
+Default: Green
+.fi
+.IP
+Border colour for focused `catchall` frames in tiling mode.
+.TP
+.B border_catchall_unfocus
+.nf
+Type: string
+Default: Dark Green
+.fi
+.IP
+Border colour for unfocused `catchall` frames in tiling mode.
+.TP
+.B border_dedicate_focus
+.nf
+Type: string
+Default: Red
+.fi
+.IP
+Border colour for focused `dedicated` frames in tiling mode.
+.TP
+.B border_dedicate_unfocus
+.nf
+Type: string
+Default: Dark Red
+.fi
+.IP
+Border colour for unfocused `dedicated` frames in tiling mode.
+.TP
+.B border_focus
+.nf
+Type: string
+Default: Blue
+.fi
+.IP
+Border colour for focused frames in tiling mode, and focused windows in
+stacking mode.
+.TP
+.B border_unfocus
+.nf
+Type: string
+Default: Dim Gray
+.fi
+.IP
+Border colour for unfocused frames in tiling mode, and unfocused windows in
+stacking mode.
+.TP
+.B border_width
+.nf
+Type: integer
+Default: 1
+.fi
+.IP
+Width in pixels of frame borders in tiling mode, and window
+borders in stacking mode. The minimum value is 0, which makes frame borders
+invisible.
+.TP
+.B command_buffer_size
+.nf
+Type: integer
+Default: 4096
+.fi
+.IP
+Size in bytes of the allocated buffer for passing commands and results
+to and from "musca -c" and "musca -i".
+.TP
+.B dmenu
+.nf
+Type: string
+Default: "dmenu -i -b"
+.fi
+.IP
+Command to run to launch 'dmenu' along with any customize appearance
+arguments. This can be replaced by another launcher so long as it accepts
+a list of \\n terminated items on stdin and returns a single line on stdout.
+.TP
+.B focus_follow_mouse
+.nf
+Type: boolean
+Default: 0
+.fi
+.IP
+(toggle) Set to 1 to enable.
+.TP
+.B frame_display_hidden
+.nf
+Type: integer
+Default: 1
+.fi
+.IP
+When set to "0", empty frames will stay empty until a window is
+manually selected. When set to "1", empty frames will automatically
+display the first available hidden window. When set to "2", empty frames
+will automatically display only windows previously displayed in this frame.
+.TP
+.B frame_min_wh
+.nf
+Type: integer
+Default: 100
+.fi
+.IP
+Minimum width and height in pixels of frames and managed windows.
+.TP
+.B frame_resize
+.nf
+Type: integer
+Default: 20
+.fi
+.IP
+Size in pixels of a frame resize step. Setting this smaller
+will make resizing operations smoother, but also slower and
+increase load.
+.TP
+.B frame_split_focus
+.nf
+Type: string
+Default: current
+.fi
+.IP
+Where focus should go when splitting a frame. When set to "current", focus
+remains to the current frame. When set to "new", the new frame receives the
+focus.
+.TP
+.B group_close_empty
+.nf
+Type: boolean
+Default: 0
+.fi
+.IP
+When set to "1" and navigating away from an empty group, automatically drop
+this group.
+.TP
+.B notify
+.nf
+Type: string
+Default: "echo `cat`"
+.fi
+.IP
+The command to run to send the user a message. By default Musca just
+writes to stdout.
+.TP
+.B notify_buffer_size
+.nf
+Type: integer
+Default: 4096
+.fi
+.IP
+Size in bytes of the allocated buffer for passing messages to the
+command defined in the 'notify' setting.
+.TP
+.B run_musca_command
+.nf
+Type: string
+Default: "$MUSCA -i"
+.fi
+.IP
+The command to run when the user has entered a Musca command via 'dmenu'.
+.TP
+.B run_shell_command
+.nf
+Type: string
+Default: "sed 's/^/exec /' | $MUSCA -i"
+.fi
+.IP
+The command to run when the user has entered a shell command via 'dmenu'.
+.TP
+.B stack_mouse_modifier
+.nf
+Type: string
+Default: Mod4
+.fi
+.IP
+The modifier key to use in `stacking` mode, along with mouse buttons
+1 and 3, to move and resize windows respectively.
+.TP
+.B startup
+.nf
+Type: string
+Default: ~/.musca_start
+.fi
+.IP
+(optional) Path to a file containing Musca commands to run at
+start up. The default setting is relative to the working directory, i.e.,
+Musca will use "$HOME/.musca_start" only if Musca is started from $HOME,
+which is the usual method for login managers. The file must contain one
+command per line. Lines starting with hash *#* are comments and blank
+lines are acceptable.
+.TP
+.B switch_group
+.nf
+Type: string
+Default: "sed 's/^/use /' | $MUSCA -i"
+.fi
+.IP
+The command to run once the user has selected a group name from 'dmenu'.
+.TP
+.B switch_window
+.nf
+Type: string
+Default: "sed 's/^/raise /' | $MUSCA -i"
+.fi
+.IP
+The command to run once the user has selected a window number and name
+from 'dmenu'.
+.TP
+.B window_open_focus
+.nf
+Type: boolean
+Default: 1
+.fi
+.IP
+(toggle) Set to 0 to prevent new windows from taking the input focus.
+.TP
+.B window_open_frame
+.nf
+Type: string
+Default: current
+.fi
+.IP
+When set to "current", new windows always open in the currently
+focused frame. When set to "empty", new windows will try to
+find an empty frame to use.
+.TP
+.B window_size_hints
+.nf
+Type: boolean
+Default: 1
+.fi
+.IP
+(toggle) Set to 0 to disable size hints checks for new windows. This
+can still be overridden on a per client basis using the client command.
+
+.SH USAGE
+.B Default Keyboard commands
+.TP
+.B Mod4+h
+hsplit 1/2
+.TP
+.B Mod4+v
+vsplit 1/2
+.TP
+.B Mod4+r
+remove
+.TP
+.B Mod4+o
+only
+.TP
+.B Mod4+k
+kill
+.TP
+.B Mod4+c
+cycle
+.TP
+.B Mod4+w
+switch window
+.TP
+.B Mod4+g
+switch group
+.TP
+.B Mod4+x
+shell
+.TP
+.B Mod4+m
+command
+.TP
+.B Mod4+d
+dedicate flip
+.TP
+.B Mod4+a
+catchall flip
+.TP
+.B Mod4+u
+undo
+.TP
+.B Mod4+s
+stack flip
+.TP
+.B Mod4+Left
+focus left
+.TP
+.B Mod4+Right
+focus right
+.TP
+.B Mod4+Up
+focus up
+.TP
+.B Mod4+Down
+focus down
+.TP
+.B Mod4+Next
+use (next)
+.TP
+.B Mod4+Prior
+use (prev)
+.TP
+.B Mod4+Tab
+screen (next)
+.TP
+.B Mod4+Control+Left
+resize left
+.TP
+.B Mod4+Control+Right
+resize right
+.TP
+.B Mod4+Control+Up
+resize up
+.TP
+.B Mod4+Control+Down
+resize down
+.TP
+.B Mod4+Shift+Left
+swap left
+.TP
+.B Mod4+Shift+Right
+swap right
+.TP
+.B Mod4+Shift+Up
+swap up
+.TP
+.B Mod4+Shift+Down
+swap down
+.SS Mouse commands
+.TP
+.B Mod4+Button1
+Moves a window in stacking mode.
+.TP
+.B Mod4+Button3
+Resizes a window in stacking mode.
+
+.SH HOOKS
+.PP
+Executing Musca commands can optionally trigger a hook command.
+This can be useful for chaining Musca commands together or firing off
+scripts on certain events. For example, set default new group padding
+by hooking into the add command:
+
+ hook on ^add pad 0 0 0 26
+
+Or, attach to multiple commands:
+
+ hook on ^(add|use) pad 0 0 0 26
+
+For now, only Musca commands trigger hooks. In the future this may be
+extended to add hooks to X events.
+
+.SH STACKING MODE
+.PP
+Stacking window management mode is available at the window group level,
+on a group by group basis. Select the group you wish to make stacking,
+and press 'Modifier+s' or run the command 'stack on'. Any frames in the
+group will disappear. Other groups will not be affected.
+.PP
+Floating windows can be moved using 'Modifier+Mouse1', i.e., hold down the
+modifier key and click the left mouse button on the window and dragging
+the mouse. Floating windows can be resized using 'Modifier+Mouse3' in the
+same fashion. Click-to-focus still works.
+.PP
+Most of the frame manipulation related key combinations and commands
+are disabled in stacking mode. Note: there is no way to float specific
+windows while in tiling mode.
+.PP
+To switch the group back to tiling mode, press 'Modifier+s' again or run the
+command 'stack off'. The group frames will be recreated as they were
+before the mode change.
+
+.SH
+Make Musca ignore windows
+.PP
+In config.h there is an unmanaged_windows[] list of WM_CLASS names:
+
+char *unmanaged_windows[] = { "trayer", "Xmessage", "Conky" };
+
+Check out the xprop utility to find class names. Either change
+unmanaged_windows[] and recompile, or do on the fly in .musca_start with
+the 'manage' command. Note that any manage setting only takes effect for
+subsequently opened windows.
+
+.SH SEE ALSO
+.PP
+.BR dmenu (1),
+.BR wmctrl (1)
+.SH AUTHORS
+Sean Pringle
