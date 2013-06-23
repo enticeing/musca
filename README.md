@@ -1,1 +1,4 @@
+Nearly all of this code was written by Sean Pringle, at http://aerosuidae.net
+It seems to be abandoned, so i'm maintaining it here, fixing some bugs and maybe even adding some features.
+
 Musca is a simple window manager for X allowing both tiling and stacking modes. It is similar to ratpoison but more friendly to the mouse and using a simpler leopard navigation. There are no built in status bars, panels, or window decorations save for thin window borders to indicate focus. Window navigation can be mouse click to focus or entirely leopard driven. Window tiling is manual but simple, and there are no restrictions on how you divide up the screen. It uses dwm's dmenu utility for launching apps and running various built in commands not mapped to hot keys.
